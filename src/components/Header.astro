@@ -5,7 +5,7 @@ import HeaderLink from './HeaderLink.astro';
 
 <header>
 	<nav>
-		<h2><a href="/">{SITE_TITLE}</a></h2>
+		<h2><a href="/"><span class="title-lamber">Lamber</span><span class="title-tech">Tech</span></a></h2>
 		<div class="internal-links">
 			<HeaderLink href="/">Home</HeaderLink>
 			<HeaderLink href="/blog">Blog</HeaderLink>
@@ -46,17 +46,24 @@ import HeaderLink from './HeaderLink.astro';
 	header {
 		margin: 0;
 		padding: 0 1em;
-		background: white;
-		box-shadow: 0 2px 8px rgba(var(--black), 5%);
+		background: rgb(var(--gray-light));
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 30%);
 	}
 	h2 {
 		margin: 0;
-		font-size: 1em;
+		font-size: 1.3em;
 	}
-
 	h2 a,
 	h2 a.active {
 		text-decoration: none;
+	}
+	.title-lamber {
+		color: var(--accent);
+		font-weight: 700;
+	}
+	.title-tech {
+		color: rgb(var(--black));
+		font-weight: 700;
 	}
 	nav {
 		display: flex;
@@ -65,17 +72,25 @@ import HeaderLink from './HeaderLink.astro';
 	}
 	nav a {
 		padding: 1em 0.5em;
-		color: var(--black);
+		color: rgb(var(--gray-dark));
 		border-bottom: 4px solid transparent;
 		text-decoration: none;
+	}
+	nav a:hover {
+		color: var(--accent);
 	}
 	nav a.active {
 		text-decoration: none;
 		border-bottom-color: var(--accent);
+		color: rgb(var(--black));
 	}
 	.social-links,
 	.social-links a {
 		display: flex;
+		color: rgb(var(--gray-dark));
+	}
+	.social-links a:hover {
+		color: var(--accent);
 	}
 	@media (max-width: 720px) {
 		.social-links {

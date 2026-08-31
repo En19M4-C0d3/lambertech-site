@@ -2,47 +2,164 @@
 import BaseHead from '../components/BaseHead.astro';
 import Footer from '../components/Footer.astro';
 import Header from '../components/Header.astro';
+import FormattedDate from '../components/FormattedDate.astro';
 import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
+import { getCollection } from 'astro:content';
+
+const blogPosts = (await getCollection('blog')).map((p) => ({ ...p, kind: 'blog' }));
+const projectPosts = (await getCollection('projects')).map((p) => ({ ...p, kind: 'projects' }));
+
+const timeline = [...blogPosts, ...projectPosts]
+	.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf())
+	.slice(0, 8);
 ---
 
 <!doctype html>
 <html lang="en">
 	<head>
 		<BaseHead title={SITE_TITLE} description={SITE_DESCRIPTION} />
+		<style>
+			.hero {
+				position: relative;
+				padding: 5em 1em 4em;
+				text-align: center;
+				overflow: hidden;
+				background-image:
+					radial-gradient(circle at 50% 0%, rgba(92, 200, 168, 0.16), transparent 60%),
+					repeating-linear-gradient(0deg, rgba(92, 200, 168, 0.05) 0px, rgba(92, 200, 168, 0.05) 1px, transparent 1px, transparent 32px),
+					repeating-linear-gradient(90deg, rgba(92, 200, 168, 0.05) 0px, rgba(92, 200, 168, 0.05) 1px, transparent 1px, transparent 32px);
+			}
+			.hero-mark {
+				width: 64px;
+				height: 64px;
+				margin: 0 auto 1.2em;
+				display: block;
+			}
+			.hero-tag {
+				font-family: var(--font-mono);
+				font-size: 0.85em;
+				color: var(--accent);
+				letter-spacing: 0.5px;
+				margin-bottom: 0.8em;
+			}
+			.hero h1 {
+				font-size: 2.6em;
+				margin-bottom: 0.4em;
+			}
+			.hero h1 .lamber {
+				color: var(--accent);
+			}
+			.hero p.pitch {
+				max-width: 560px;
+				margin: 0 auto 1.6em;
+				color: rgb(var(--gray-dark));
+				font-size: 1.05em;
+			}
+			.hero-ctas {
+				display: flex;
+				gap: 0.8em;
+				justify-content: center;
+			}
+			.hero-ctas a {
+				font-size: 0.9em;
+				padding: 0.6em 1.2em;
+				border-radius: 6px;
+				text-decoration: none;
+			}
+			.cta-primary {
+				background: var(--accent);
+				color: rgb(11, 14, 17);
+				font-weight: 700;
+			}
+			.cta-secondary {
+				border: 1px solid rgba(var(--gray), 40%);
+				color: rgb(var(--gray-dark));
+			}
+			section.timeline {
+				max-width: 760px;
+				margin: 0 auto;
+				padding: 3em 1em;
+			}
+			section.timeline h2 {
+				font-size: 1.4em;
+				margin-bottom: 1.2em;
+			}
+			.entry {
+				display: block;
+				padding: 1.2em;
+				margin-bottom: 1em;
+				border: 1px solid rgba(var(--gray), 20%);
+				border-radius: 10px;
+				text-decoration: none;
+				transition: border-color 0.2s ease;
+			}
+			.entry:hover {
+				border-color: var(--accent);
+			}
+			.entry-tag {
+				font-family: var(--font-mono);
+				font-size: 0.75em;
+				text-transform: uppercase;
+				letter-spacing: 0.5px;
+			}
+			.entry-tag.blog { color: var(--accent-dark); }
+			.entry-tag.projects { color: var(--accent); }
+			.entry-title {
+				color: rgb(var(--black));
+				margin: 0.4em 0 0.3em;
+				font-size: 1.15em;
+			}
+			.entry-desc {
+				color: rgb(var(--gray));
+				font-size: 0.95em;
+				margin: 0 0 0.4em;
+			}
+			.entry-date {
+				color: rgb(var(--gray));
+				font-size: 0.8em;
+			}
+		</style>
 	</head>
 	<body>
 		<Header />
 		<main>
-			<h1>🧑‍🚀 Hello, Astronaut!</h1>
-			<p>
-				Welcome to the official <a href="https://astro.build/">Astro</a> blog starter template. This template
-				serves as a lightweight, minimally-styled starting point for anyone looking to build a personal
-				website, blog, or portfolio with Astro.
-			</p>
-			<p>
-				This template comes with a few integrations already configured in your
-				<code>astro.config.mjs</code> file. You can customize your setup with
-				<a href="https://astro.build/integrations">Astro Integrations</a> to add tools like Tailwind,
-				React, or Vue to your project.
-			</p>
-			<p>Here are a few ideas on how to get started with the template:</p>
-			<ul>
-				<li>Edit this page in <code>src/pages/index.astro</code></li>
-				<li>Edit the site header items in <code>src/components/Header.astro</code></li>
-				<li>Add your name to the footer in <code>src/components/Footer.astro</code></li>
-				<li>Check out the included blog posts in <code>src/content/blog/</code></li>
-				<li>Customize the blog post page layout in <code>src/layouts/BlogPost.astro</code></li>
-			</ul>
-			<p>
-				Have fun! If you get stuck, remember to
-				<a href="https://docs.astro.build/">read the docs</a>
-				or <a href="https://astro.build/chat">join us on Discord</a> to ask questions.
-			</p>
-			<p>
-				Looking for a blog template with a bit more personality? Check out
-				<a href="https://github.com/Charca/astro-blog-template">astro-blog-template</a>
-				by <a href="https://twitter.com/Charca">Maxi Ferreira</a>.
-			</p>
+			<div class="hero">
+				<svg class="hero-mark" viewBox="0 0 100 100" fill="none">
+					<circle cx="50" cy="50" r="46" stroke="#5CC8A8" stroke-width="4" />
+					<circle cx="50" cy="50" r="24" fill="#5CC8A8" opacity="0.9" />
+					<circle cx="50" cy="50" r="10" fill="#0B0E11" />
+				</svg>
+				<div class="hero-tag">security analyst // OT-ICS // home lab builder</div>
+				<h1><span class="lamber">Lamber</span>Tech</h1>
+				<p class="pitch">{SITE_DESCRIPTION}</p>
+				<div class="hero-ctas">
+					<a class="cta-primary" href="/blog">Read the blog</a>
+					<a class="cta-secondary" href="/about">About me</a>
+				</div>
+			</div>
+
+			<section class="timeline">
+				<h2>Latest</h2>
+				{
+					timeline.map((item) => (
+						item.kind === 'blog' ? (
+							<a class="entry" href={`/blog/${item.id}/`}>
+								<span class="entry-tag blog">blog</span>
+								<h3 class="entry-title">{item.data.title}</h3>
+								<p class="entry-desc">{item.data.description}</p>
+								<span class="entry-date"><FormattedDate date={item.data.pubDate} /></span>
+							</a>
+						) : (
+							<div class="entry">
+								<span class="entry-tag projects">project</span>
+								<h3 class="entry-title">{item.data.title}</h3>
+								<p class="entry-desc">{item.data.description}</p>
+								<span class="entry-date"><FormattedDate date={item.data.pubDate} /></span>
+							</div>
+						)
+					))
+				}
+			</section>
 		</main>
 		<Footer />
 	</body>
