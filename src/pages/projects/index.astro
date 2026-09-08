@@ -1,0 +1,69 @@
+---
+import { getCollection } from 'astro:content';
+import BaseHead from '../../components/BaseHead.astro';
+import Footer from '../../components/Footer.astro';
+import FormattedDate from '../../components/FormattedDate.astro';
+import Header from '../../components/Header.astro';
+import { SITE_DESCRIPTION, SITE_TITLE } from '../../consts';
+
+const projects = (await getCollection('projects')).sort(
+	(a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf(),
+);
+---
+<!doctype html>
+<html lang="en">
+	<head>
+		<BaseHead title={`Projects — ${SITE_TITLE}`} description={SITE_DESCRIPTION} />
+		<style>
+			main {
+				width: 720px;
+				max-width: calc(100% - 2em);
+				margin: auto;
+				padding: 3em 1em;
+			}
+			.entry {
+				display: block;
+				padding: 1.2em;
+				margin-bottom: 1em;
+				border: 1px solid rgba(var(--gray), 20%);
+				border-radius: 10px;
+				text-decoration: none;
+				transition: border-color 0.2s ease;
+			}
+			.entry:hover {
+				border-color: var(--accent);
+			}
+			.entry-title {
+				color: rgb(var(--black));
+				margin: 0.2em 0 0.3em;
+			}
+			.entry-desc {
+				color: rgb(var(--gray));
+				font-size: 0.95em;
+				margin: 0 0 0.4em;
+			}
+			.entry-date {
+				color: rgb(var(--gray));
+				font-size: 0.8em;
+			}
+		</style>
+	</head>
+	<body>
+		<Header />
+		<main>
+			<h1>Projects</h1>
+			<section>
+				{
+					projects.map((project) => (
+						<a class="entry" href={`/projects/${project.id}/`}>
+							<h2 class="entry-title">{project.data.title}</h2>
+							<p class="entry-desc">{project.data.description}</p>
+							<span class="entry-date"><FormattedDate date={project.data.pubDate} /></span>
+						</a>
+					))
+				}
+			</section>
+		</main>
+		<Footer />
+	</body>
+</html>

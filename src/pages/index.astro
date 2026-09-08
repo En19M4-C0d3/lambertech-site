@@ -150,12 +150,12 @@ const timeline = [...blogPosts, ...projectPosts]
 								<span class="entry-date"><FormattedDate date={item.data.pubDate} /></span>
 							</a>
 						) : (
-							<div class="entry">
+							<a class="entry" href={`/projects/${item.id}/`}>
 								<span class="entry-tag projects">project</span>
 								<h3 class="entry-title">{item.data.title}</h3>
 								<p class="entry-desc">{item.data.description}</p>
 								<span class="entry-date"><FormattedDate date={item.data.pubDate} /></span>
-							</div>
+							</a>
 						)
 					))
 				}

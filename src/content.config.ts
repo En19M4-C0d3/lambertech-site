@@ -20,6 +20,7 @@ const projects = defineCollection({
 		z.object({
 			title: z.string(),
 			description: z.string(),
+			status: z.enum(['planned', 'in-progress', 'complete']).optional(),
 			pubDate: z.coerce.date(),
 			updatedDate: z.coerce.date().optional(),
 			heroImage: z.optional(image()),

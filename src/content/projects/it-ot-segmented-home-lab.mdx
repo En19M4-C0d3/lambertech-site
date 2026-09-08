@@ -1,0 +1,156 @@
+---
+title: 'From Standards to Segmentation: An IT/OT Lab Built From Scratch'
+description: 'Designing, building, and validating a segmented IT/OT converged network using real Cisco hardware, Windows Server, and IEC 62443 / NIST SP 800-82 frameworks.'
+pubDate: '2026-08-01'
+status: 'in-progress'
+tools: ['IEC 62443', 'NIST SP 800-82', 'Purdue Model', 'Cisco IOS', 'Active Directory', 'VLAN Segmentation', 'OT/ICS', 'VMware', 'Ubuntu', 'Wazuh']
+outcome: 'Built and validated a segmented IT/OT lab using real Cisco hardware and ACL-enforced zone boundaries, closing a discovered gap where OT traffic could reach IT infrastructure, and produced a full portfolio write-up documented against IEC 62443 and NIST SP 800-82.'
+tags: ['OT/ICS Security', 'networking', 'home lab']
+---
+import Accordion from '../../components/Accordion.astro';
+
+## Why I started this project
+
+I have been working in IT security for a while and have built up a solid foundation of theoretical knowledge — frameworks, standards, risk models, the terminology of defence-in-depth. But there is a specific type of knowledge that theory cannot give you: what actually happens when you sit down and build something.
+
+I wanted to move into the OT/ICS security space — the intersection of IT and industrial systems, the unique constraints of environments where uptime is everything and a patching window might be six months away. I had read the standards and understood the concepts. What I lacked was evidence that I could implement them.
+
+So I built a lab.
+
+**The goal:** design and build a segmented network simulating a real IT/OT converged environment, validate the segmentation actually works, document everything against IEC 62443 and NIST SP 800-82, and produce a portfolio document that demonstrates implementation, not just theory.
+
+## What I built
+
+The lab uses real Cisco networking hardware — a Cisco 1841 router and a Catalyst 2960 Plus switch — alongside a Windows Server 2022 domain controller and four virtual machines across both IT and OT zones.
+
+| Device | Model | Role |
+|---|---|---|
+| Router | Cisco 1841 | Inter-VLAN routing, NAT, ACL zone boundary |
+| Switch | Catalyst 2960 Plus 24-port SI | VLAN switching, 802.1q trunk |
+| Server | HP EliteDesk (i7 8th gen) | Windows Server 2022 — AD DS, DNS, DHCP |
+| Main PC | Dual-NIC workstation | VMware Workstation host for all four VMs |
+| Laptop | Dell (Ubuntu 26.04) | Planned Wazuh SIEM host — pending ethernet adapter |
+
+## Network architecture — Purdue Model mapping
+
+The architecture follows the Purdue Model, the industry-standard hierarchical framework for OT network design referenced in both IEC 62443 and NIST SP 800-82.
+
+| Level | Zone | Contents |
+|---|---|---|
+| 5 | Enterprise / Internet | Home broadband router |
+| 4 | IT Zone — VLAN 10 (192.168.10.0/24) | DC01, LAB-WIN-WRK01, LAB-LNX-WRK01 |
+| 3.5 | DMZ / IT-OT Boundary — VLAN 30 (reserved) | Future: stateful firewall, jump server |
+| 3 | OT Simulation Zone — VLAN 20 (192.168.20.0/24) | LAB-WIN-OT01, LAB-LNX-OT01 |
+| 0–2 | OT Field — VLAN 40 (reserved) | Future: OpenPLC, simulated sensors |
+
+| VM | OS | VLAN | IP | Domain joined |
+|---|---|---|---|---|
+| LAB-WIN-WRK01 | Windows 11 Pro | 10 | 192.168.10.101 | Yes |
+| LAB-LNX-WRK01 | Ubuntu 26.04 | 10 | 192.168.10.102 | Yes |
+| LAB-WIN-OT01 | Win 11 Pro for Workstations | 20 | 192.168.20.101 | No — intentional |
+| LAB-LNX-OT01 | Ubuntu 26.04 | 20 | 192.168.20.102 | No — intentional |
+
+**Why the OT VMs don't join the domain:** a deliberate architectural decision, not a limitation. NIST SP 800-82 Section 5.5 recommends OT systems not share authentication infrastructure with IT systems — if the IT domain is compromised, OT systems with no domain dependency remain unaffected.
+
+## How the segmentation works
+
+The Cisco 1841 handles inter-VLAN routing using router-on-a-stick — the physical interface Fa0/1 divided into four logical sub-interfaces, one per VLAN, each with its own gateway. The Catalyst 2960 carries all VLANs over a single trunk to the router, with access ports assigning each physical device to the correct VLAN.
+
+Zone boundary enforcement is handled by ACLs on the router sub-interfaces, blocking both directions — IT cannot initiate to OT, and OT cannot initiate to IT. `no ip unreachables` was added so the boundary is completely silent: blocked hosts get no response at all, preventing topology disclosure.
+
+### Segmentation test results
+
+| Source | Target | Pre-hardening | Post-hardening |
+|---|---|---|---|
+| IT (VLAN 10) | OT hosts | Blocked by host firewall | Blocked at router ACL |
+| OT (VLAN 20) | IT DC | Router forwarded — DC responded | Blocked at router ACL |
+| OT (VLAN 20) | IT workstations | Blocked by host firewall | Blocked at router ACL |
+| Any VLAN | Internet | Working via NAT | Working via NAT |
+
+The pre-hardening baseline was the most important discovery: the OT zone could reach the IT domain controller because the router forwarded packets without restriction, and only host-level firewalls were providing defence — endpoint protection, not zone boundary protection. The post-hardening ACL closed that gap at the network level, which is what IEC 62443-3-3 SR 5.2 actually requires.
+
+## Challenges I hit along the way
+
+Nothing here went perfectly first time — that's not a criticism of the process, it's the point of it.
+
+<Accordion title="Hyper-V conflict with VMware Workstation" icon="⚡">
+**The problem:** VMware Workstation networking was broken — VMs couldn't reach the physical network despite correct configuration. `bcdedit /set hypervisorlaunchtype off` only stops the Hyper-V hypervisor from launching at boot; the Hyper-V networking stack and vEthernet adapters were still active and intercepting VMware's traffic.
+
+**The fix:** ran `Disable-WindowsOptionalFeature -Online -FeatureName Microsoft-Hyper-V-All` to fully remove Hyper-V at the Windows feature level. After a reboot, the vEthernet adapters disappeared and VMware networking worked correctly.
+
+**What I learned:** `bcdedit` and `Disable-WindowsOptionalFeature` are completely different operations — one stops the hypervisor booting, the other removes the networking stack entirely.
+</Accordion>
+
+<Accordion title="Ubuntu receiving two IP addresses — netplan vs nmcli" icon="🐧">
+**The problem:** Ubuntu VMs received both my intended static IP and a secondary DHCP-assigned address simultaneously, despite setting the static IP through `nmcli`.
+
+**The fix:** the Ubuntu installer writes a netplan YAML file with `dhcp4: true`, and `nmcli` operates above the netplan layer — it doesn't override the YAML. Editing the YAML directly to `dhcp4: false` and running `sudo netplan apply` fixed it.
+
+**What I learned:** on modern Ubuntu with netplan, the YAML file is the source of truth, not NetworkManager's runtime state.
+</Accordion>
+
+<Accordion title="systemd-resolved refusing .local domain queries" icon="🔍">
+**The problem:** `nslookup lab.lambertech.local` returned REFUSED or SERVFAIL on all Ubuntu VMs, despite the correct DNS server being set — querying the DC directly worked fine.
+
+**The fix:** `systemd-resolved` reserves `.local` for mDNS by default and refuses to forward those queries upstream, regardless of configured DNS. A drop-in config at `/etc/systemd/resolved.conf.d/lab.conf` specifying the domain and DNS server fixed it.
+
+**What I learned:** this is a deliberate design decision in `systemd-resolved`, not a bug — and never edit `/etc/resolv.conf` directly on a system using it, since it's a managed symlink.
+</Accordion>
+
+<Accordion title="VMnet2 host-only networking failure — solved with a second NIC" icon="🔌">
+**The problem:** OT zone VMs had no connectivity. VMware can't bridge two VMnets to the same physical NIC, so VMnet2 was host-only — but the host adapter never got a valid IP, and Hyper-V components were still interfering even after the earlier fix.
+
+**The fix:** abandoned host-only networking entirely. The host PC's unused second NIC was bridged to VMnet2 and physically cabled to a VLAN 20 access port on the switch.
+
+**What I learned:** physical separation turned out to be more reliable *and* architecturally stronger than the software routing workaround — closer to how a real OT network is actually segmented.
+</Accordion>
+
+<Accordion title="Cisco switch trunk VLANs showing as none — silent command failure" icon="🔧">
+**The problem:** `show interfaces trunk` showed `VLANs allowed: none` despite configuration appearing correct.
+
+**The fix:** two issues — no physical link yet on one end, and a typo (`allow` instead of `allowed` in `switchport trunk allowed vlan`). Cisco IOS accepted the malformed command without error and applied nothing.
+
+**What I learned:** IOS doesn't always error on a malformed command — always verify with `show` commands rather than assuming a command worked because nothing complained.
+</Accordion>
+
+## The frameworks behind the decisions
+
+Every significant design decision referenced at least one of three frameworks:
+
+**IEC 62443 — Zone and Conduit Model.** VLAN 10 and VLAN 20 are zones; the Cisco 1841 ACLs are the conduit. Every packet crossing between zones must be explicitly permitted or denied.
+
+**NIST SP 800-82 Rev 3.** Section 5.5 (separate identity infrastructure for OT — hence no domain join) and Section 5.8 (stateful firewalls at zone boundaries — the highest-priority remaining recommendation) directly shaped this project.
+
+**Purdue Model.** Gives the five-level hierarchy and shared vocabulary that both IT and OT practitioners understand.
+
+## Where the project stands
+
+| Item | Status |
+|---|---|
+| Cisco 1841 and 2960 configuration | Complete |
+| Windows Server 2022 — AD DS, DNS, DHCP | Complete |
+| Four virtual machine endpoints | Complete |
+| Segmentation testing — before/after ACL hardening | Complete |
+| Portfolio documentation | Complete |
+| Wazuh SIEM deployment | In progress — USB-Ethernet adapter ordered |
+| Stateful firewall in VLAN 30 DMZ | Planned |
+| DNS forwarder in DMZ for OT zone | Planned |
+| OpenPLC simulation — Level 1/2 | Planned |
+| Managed WiFi AP for monitoring laptop | Planned |
+
+## What comes next
+
+1. **Wazuh SIEM deployment** — once the USB-to-Ethernet adapter arrives, the laptop joins VLAN 10, Wazuh manager installs, and agents deploy to all five hosts. This closes the highest-priority gap: no monitoring currently exists across either zone.
+2. **pfSense stateful firewall in VLAN 30** — replacing the current stateless ACLs with a firewall that can inspect traffic content, track session state, and log every crossing of the IT/OT boundary.
+3. **OpenPLC on VLAN 40** — extending the lab into Levels 0–2 of the Purdue Model with a real simulated PLC runtime.
+4. **DNS forwarder in the DMZ** — closing the current gap where OT VMs query the IT domain controller directly for DNS.
+
+## What this project has taught me
+
+I started this project knowing the theory. What I didn't know was what happens when you actually try to implement it — the Hyper-V conflict, the netplan override, the `.local` mDNS reservation, the VMnet2 failure that took multiple sessions to isolate and ultimately led to a better architecture than I'd originally planned.
+
+None of those problems appear in a textbook. They only get solved by understanding what's actually happening at each layer of the stack — not just what the configuration is supposed to look like.
+
+A security practitioner who has only read about network segmentation and one who has built it, broken it, and fixed it are not the same thing. This project exists to close that gap — for me, and as evidence to anyone reading this that I've done more than read the standards.
+
+The project isn't finished. The core architecture is built, validated, and documented. What remains is extending it — and that's the interesting part.

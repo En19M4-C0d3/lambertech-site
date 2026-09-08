@@ -1,0 +1,23 @@
+---
+interface Props {
+	status: 'complete' | 'in-progress' | 'planned';
+}
+const { status } = Astro.props;
+const labels = { complete: 'COMPLETE', 'in-progress': 'IN PROGRESS', planned: 'PLANNED' };
+---
+<span class={`status-pill status-${status}`}>{labels[status]}</span>
+
+<style>
+	.status-pill {
+		font-family: var(--font-mono);
+		font-size: 0.7em;
+		font-weight: 700;
+		padding: 0.25em 0.6em;
+		border-radius: 4px;
+		letter-spacing: 0.5px;
+		white-space: nowrap;
+	}
+	.status-complete { background: rgba(92, 200, 168, 0.15); color: var(--accent); }
+	.status-in-progress { background: rgba(63, 167, 199, 0.15); color: var(--accent-dark); }
+	.status-planned { background: rgba(138, 143, 152, 0.15); color: rgb(var(--gray)); }
+</style>
