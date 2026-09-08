@@ -1,63 +1,126 @@
 ---
-import AboutHeroImage from '../assets/blog-placeholder-about.jpg';
-import Layout from '../layouts/BlogPost.astro';
+import BaseHead from '../components/BaseHead.astro';
+import Footer from '../components/Footer.astro';
+import Header from '../components/Header.astro';
+import { SITE_TITLE } from '../consts';
+
+const certs = ['CompTIA A+', 'Network+', 'Security+', 'CySA+'];
 ---
+<!doctype html>
+<html lang="en">
+	<head>
+		<BaseHead title={`About — ${SITE_TITLE}`} description="A quick look at who I am and the pivot I'm making into IT and security." />
+		<style>
+			main {
+				max-width: 640px;
+				margin: 0 auto;
+				padding: 4em 1em;
+			}
+			.tag {
+				font-family: var(--font-mono);
+				font-size: 0.85em;
+				color: var(--accent);
+				margin-bottom: 0.6em;
+			}
+			h1 {
+				margin-bottom: 0.6em;
+			}
+			.lede {
+				font-size: 1.1em;
+				color: rgb(var(--gray-dark));
+				margin-bottom: 1.6em;
+			}
+			.certs {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 0.6em;
+				margin: 1.6em 0 2em;
+			}
+			.cert-pill {
+				font-family: var(--font-mono);
+				font-size: 0.8em;
+				padding: 0.4em 0.8em;
+				border: 1px solid var(--accent);
+				border-radius: 5px;
+				color: var(--accent);
+			}
+			.now-box {
+				border: 1px solid rgba(var(--gray), 20%);
+				border-radius: 10px;
+				padding: 1.2em 1.4em;
+				margin: 2em 0;
+			}
+			.now-box h3 {
+				font-family: var(--font-mono);
+				font-size: 0.8em;
+				text-transform: uppercase;
+				color: var(--accent);
+				margin: 0 0 0.6em;
+			}
+			.contact-row {
+				display: flex;
+				gap: 1em;
+				flex-wrap: wrap;
+				margin-top: 2em;
+			}
+			.contact-row a {
+				font-size: 0.95em;
+				padding: 0.5em 1em;
+				border-radius: 6px;
+				text-decoration: none;
+			}
+			.contact-primary {
+				background: var(--accent);
+				color: rgb(11, 14, 17);
+				font-weight: 700;
+			}
+			.contact-secondary {
+				border: 1px solid rgba(var(--gray), 40%);
+				color: rgb(var(--gray-dark));
+			}
+			.more-link {
+				display: inline-block;
+				margin-top: 1.8em;
+				font-size: 0.9em;
+			}
+		</style>
+	</head>
+	<body>
+		<Header />
+		<main>
+			<div class="tag">about</div>
+			<h1>Eljay Lambert</h1>
+			<p class="lede">
+				Former Senior Teaching Assistant and Specialist Teacher, now building a career in IT and security —
+				one certification, one project, and one home lab experiment at a time.
+			</p>
 
-<Layout
-	title="About Me"
-	description="Lorem ipsum dolor sit amet"
-	pubDate={new Date('August 08 2021')}
-	heroImage={AboutHeroImage}
->
-	<p>
-		Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
-		labore et dolore magna aliqua. Vitae ultricies leo integer malesuada nunc vel risus commodo
-		viverra. Adipiscing enim eu turpis egestas pretium. Euismod elementum nisi quis eleifend quam
-		adipiscing. In hac habitasse platea dictumst vestibulum. Sagittis purus sit amet volutpat. Netus
-		et malesuada fames ac turpis egestas. Eget magna fermentum iaculis eu non diam phasellus
-		vestibulum lorem. Varius sit amet mattis vulputate enim. Habitasse platea dictumst quisque
-		sagittis. Integer quis auctor elit sed vulputate mi. Dictumst quisque sagittis purus sit amet.
-	</p>
+			<p>
+				Eight years supporting SEND students taught me how to manage pressure, communicate clearly to
+				different audiences, and hold to process even when it's inconvenient — skills that turned out to
+				transfer directly into security work. I'm now pivoting deliberately toward IT and OT/ICS security,
+				building the practical evidence to back up the theory.
+			</p>
 
-	<p>
-		Morbi tristique senectus et netus. Id semper risus in hendrerit gravida rutrum quisque non
-		tellus. Habitasse platea dictumst quisque sagittis purus sit amet. Tellus molestie nunc non
-		blandit massa. Cursus vitae congue mauris rhoncus. Accumsan tortor posuere ac ut. Fringilla urna
-		porttitor rhoncus dolor. Elit ullamcorper dignissim cras tincidunt lobortis. In cursus turpis
-		massa tincidunt dui ut ornare lectus. Integer feugiat scelerisque varius morbi enim nunc.
-		Bibendum neque egestas congue quisque egestas diam. Cras ornare arcu dui vivamus arcu felis
-		bibendum. Dignissim suspendisse in est ante in nibh mauris. Sed tempus urna et pharetra pharetra
-		massa massa ultricies mi.
-	</p>
+			<div class="certs">
+				{certs.map((cert) => <span class="cert-pill">{cert}</span>)}
+			</div>
 
-	<p>
-		Mollis nunc sed id semper risus in. Convallis a cras semper auctor neque. Diam sit amet nisl
-		suscipit. Lacus viverra vitae congue eu consequat ac felis donec. Egestas integer eget aliquet
-		nibh praesent tristique magna sit amet. Eget magna fermentum iaculis eu non diam. In vitae
-		turpis massa sed elementum. Tristique et egestas quis ipsum suspendisse ultrices. Eget lorem
-		dolor sed viverra ipsum. Vel turpis nunc eget lorem dolor sed viverra. Posuere ac ut consequat
-		semper viverra nam. Laoreet suspendisse interdum consectetur libero id faucibus. Diam phasellus
-		vestibulum lorem sed risus ultricies tristique. Rhoncus dolor purus non enim praesent elementum
-		facilisis. Ultrices tincidunt arcu non sodales neque. Tempus egestas sed sed risus pretium quam
-		vulputate. Viverra suspendisse potenti nullam ac tortor vitae purus faucibus ornare. Fringilla
-		urna porttitor rhoncus dolor purus non. Amet dictum sit amet justo donec enim.
-	</p>
+			<div class="now-box">
+				<h3>Right now</h3>
+				<p>
+					Building an IT/OT segmented home lab from scratch, working toward OT/ICS security roles, and
+					documenting the whole journey — the wins and the debugging sessions — here on this site.
+				</p>
+			</div>
 
-	<p>
-		Mattis ullamcorper velit sed ullamcorper morbi tincidunt. Tortor posuere ac ut consequat semper
-		viverra. Tellus mauris a diam maecenas sed enim ut sem viverra. Venenatis urna cursus eget nunc
-		scelerisque viverra mauris in. Arcu ac tortor dignissim convallis aenean et tortor at. Curabitur
-		gravida arcu ac tortor dignissim convallis aenean et tortor. Egestas tellus rutrum tellus
-		pellentesque eu. Fusce ut placerat orci nulla pellentesque dignissim enim sit amet. Ut enim
-		blandit volutpat maecenas volutpat blandit aliquam etiam. Id donec ultrices tincidunt arcu. Id
-		cursus metus aliquam eleifend mi.
-	</p>
+			<a class="more-link" href="/blog/why-i-started-this-site/">Read the full story on why I started this site →</a>
 
-	<p>
-		Tempus quam pellentesque nec nam aliquam sem. Risus at ultrices mi tempus imperdiet. Id porta
-		nibh venenatis cras sed felis eget velit. Ipsum a arcu cursus vitae. Facilisis magna etiam
-		tempor orci eu lobortis elementum. Tincidunt dui ut ornare lectus sit. Quisque non tellus orci
-		ac. Blandit libero volutpat sed cras. Nec tincidunt praesent semper feugiat nibh sed pulvinar
-		proin gravida. Egestas integer eget aliquet nibh praesent tristique magna.
-	</p>
-</Layout>
+			<div class="contact-row">
+				<a class="contact-primary" href="mailto:eljay@lambertech.co.uk">Email me</a>
+				<a class="contact-secondary" href="https://www.linkedin.com/in/eljay-lambert-9a46422ba/" target="_blank">LinkedIn</a>
+			</div>
+		</main>
+		<Footer />
+	</body>
+</html>
