@@ -23,7 +23,7 @@ const timeline = [...blogPosts, ...projectPosts]
 		<style>
 			.hero {
 				position: relative;
-				padding: 5em 1em 4em;
+				padding: 3em 1em 4em;
 				text-align: center;
 				overflow: hidden;
 				background-image:
@@ -32,7 +32,7 @@ const timeline = [...blogPosts, ...projectPosts]
 					repeating-linear-gradient(90deg, rgba(92, 200, 168, 0.05) 0px, rgba(92, 200, 168, 0.05) 1px, transparent 1px, transparent 32px);
 			}
 			.hero-mark {
-				width: 340px;
+				width: 420px;
 				height: auto;
 				margin: 0 auto 1.2em;
 				display: block;
@@ -126,9 +126,8 @@ const timeline = [...blogPosts, ...projectPosts]
 		<Header />
 		<main>
 			<div class="hero">
-				<Image src={heroLogo} alt="LamberTech logo" width={380} height={396} class="hero-mark" />
+				<Image src={heroLogo} alt="LamberTech logo" width={460} height={480} class="hero-mark" />
 				<div class="hero-tag">security analyst // OT-ICS // home lab builder</div>
-				<h1><span class="lamber">Lamber</span>Tech</h1>
 				<p class="pitch">{SITE_DESCRIPTION}</p>
 				<div class="hero-ctas">
 					<a class="cta-primary" href="/blog">Read the blog</a>

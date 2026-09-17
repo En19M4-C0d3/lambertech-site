@@ -7,7 +7,7 @@ import logoIcon from '../assets/Lamb_Favicon.svg';
 
 <header>
 	<nav>
-		<h2><a href="/" class="brand-link"><Image src={logoIcon} alt="" width={40} height={40} /><span class="wordmark"><span class="title-lamber">Lamber</span><span class="title-tech">Tech</span></span></a></h2>
+		<h2><a href="/" class="brand-link"><Image src={logoIcon} alt="" width={56} height={56} class="brand-icon" /><span class="wordmark"><span class="title-lamber">Lamber</span><span class="title-tech">Tech</span></span></a></h2>
 		<div class="internal-links">
 			<HeaderLink href="/">Home</HeaderLink>
                         <HeaderLink href="/projects">Projects</HeaderLink>
@@ -44,7 +44,11 @@ import logoIcon from '../assets/Lamb_Favicon.svg';
 .brand-link {
 	display: flex;
 	align-items: center;
-	gap: 0.6em;
+	gap: 0.2em;
+}
+.brand-icon {
+	display: block;
+	margin-top: -2px;
 }
 	header {
 		margin: 0;
