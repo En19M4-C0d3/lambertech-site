@@ -1,11 +1,13 @@
 ---
 import { SITE_TITLE } from '../consts';
 import HeaderLink from './HeaderLink.astro';
+import { Image } from 'astro:assets';
+import logoIcon from '../assets/Lamb_Favicon.svg';
 ---
 
 <header>
 	<nav>
-		<h2><a href="/"><span class="title-lamber">Lamber</span><span class="title-tech">Tech</span></a></h2>
+		<h2><a href="/" class="brand-link"><Image src={logoIcon} alt="" width={32} height={32} /><span class="title-lamber">Lamber</span><span class="title-tech">Tech</span></a></h2>
 		<div class="internal-links">
 			<HeaderLink href="/">Home</HeaderLink>
                         <HeaderLink href="/projects">Projects</HeaderLink>
@@ -38,6 +40,12 @@ import HeaderLink from './HeaderLink.astro';
 	</nav>
 </header>
 <style>
+
+.brand-link {
+	display: flex;
+	align-items: center;
+	gap: 0.5em;
+}
 	header {
 		margin: 0;
 		padding: 0 1em;

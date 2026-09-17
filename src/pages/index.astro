@@ -5,6 +5,8 @@ import Header from '../components/Header.astro';
 import FormattedDate from '../components/FormattedDate.astro';
 import { SITE_DESCRIPTION, SITE_TITLE } from '../consts';
 import { getCollection } from 'astro:content';
+import { Image } from 'astro:assets';
+import heroLogo from '../assets/Lamber_Logo.svg';
 
 const blogPosts = (await getCollection('blog')).map((p) => ({ ...p, kind: 'blog' }));
 const projectPosts = (await getCollection('projects')).map((p) => ({ ...p, kind: 'projects' }));
@@ -30,8 +32,8 @@ const timeline = [...blogPosts, ...projectPosts]
 					repeating-linear-gradient(90deg, rgba(92, 200, 168, 0.05) 0px, rgba(92, 200, 168, 0.05) 1px, transparent 1px, transparent 32px);
 			}
 			.hero-mark {
-				width: 64px;
-				height: 64px;
+				width: 220px;
+				height: auto;
 				margin: 0 auto 1.2em;
 				display: block;
 			}
@@ -124,11 +126,7 @@ const timeline = [...blogPosts, ...projectPosts]
 		<Header />
 		<main>
 			<div class="hero">
-				<svg class="hero-mark" viewBox="0 0 100 100" fill="none">
-					<circle cx="50" cy="50" r="46" stroke="#5CC8A8" stroke-width="4" />
-					<circle cx="50" cy="50" r="24" fill="#5CC8A8" opacity="0.9" />
-					<circle cx="50" cy="50" r="10" fill="#0B0E11" />
-				</svg>
+				<Image src={heroLogo} alt="LamberTech logo" width={280} height={290} class="hero-mark" />
 				<div class="hero-tag">security analyst // OT-ICS // home lab builder</div>
 				<h1><span class="lamber">Lamber</span>Tech</h1>
 				<p class="pitch">{SITE_DESCRIPTION}</p>
