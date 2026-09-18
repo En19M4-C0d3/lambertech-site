@@ -1,0 +1,38 @@
+---
+title: 'Wazuh SIEM Home Lab — Incident Detection & Reporting'
+description: 'A SOC-style incident report from a Wazuh home lab challenge, covering account manipulation, cross-platform file integrity monitoring, and automated SSH brute-force response.'
+pubDate: '2026-09-17'
+status: 'complete'
+tools: ['Wazuh', 'Windows Server', 'Ubuntu', 'SSH', 'File Integrity Monitoring', 'Active Response']
+outcome: 'Detected and documented three distinct attack/misuse scenarios across a mixed Windows/Ubuntu environment, including a fully automated containment response to an SSH brute-force attempt in under 12 seconds end to end, and produced a full evidence-based incident report with six concrete recommendations.'
+tags: ['SIEM', 'incident response', 'MYDFIR challenge', 'home lab']
+---
+
+This project was completed as part of MYDFIR's Wazuh SIEM challenge — a hands-on exercise in building a functioning SOC home lab and then documenting what it detects the way a real analyst would: not just showing that alerts fired, but walking through the evidence, reasoning through what it means, and recommending what to do about it.
+
+## The scenarios
+
+The lab covered three scenarios across a Windows and Ubuntu environment.
+
+**Windows account manipulation.** A temporary account (`Student1`) was created, added to the default Users group, escalated into the local Administrators group, and then deleted — a full creation-to-privilege-to-deletion cycle inside about a minute. Separately, the built-in Guest account (disabled by default) was enabled. A custom Wazuh rule (100210) was written specifically to catch this: it narrows the generic, noisy Windows Event ID 4722 ("a user account was enabled") down to fire only when the affected account is Guest — because 4722 alone fires for *any* account enablement and isn't actionable on its own.
+
+**Cross-platform File Integrity Monitoring.** Real-time FIM was configured on both the Windows agent (`C:\companydata`) and the Ubuntu agent (`/opt/company-data`), then validated by performing an identical add → modify → delete sequence against a test file on each host. All six events were correctly captured by Wazuh's built-in FIM rules (554 added, 550 modified, 553 deleted), with consistent rule severity across both operating systems — confirming syscheck monitoring behaves the same regardless of host OS.
+
+**SSH brute-force detection and automated response.** The Windows host made three failed SSH authentication attempts against the Ubuntu host inside six seconds. A custom correlation rule (100101) recognized the repeated-failure pattern from a single source and raised a dedicated alert four seconds later. Wazuh's Active Response then blocked the offending IP via a firewall-drop rule (651) within roughly 1.25 seconds of that alert — the entire chain, from first failed login to automated containment, completing in under 12 seconds.
+
+## Analysis
+
+Two hypotheses are consistent with the evidence across all three scenarios: authorized administrative or testing activity, or an insider threat / compromised credential. The report addresses who, what, when, where, why, and how across the full environment, cross-referencing timestamps and rule IDs between the account manipulation, FIM, and SSH scenarios rather than treating them as isolated events.
+
+## Recommendations
+
+1. **Keep the Guest account disabled by default.** Guest re-enablement is a known persistence/defense-evasion technique — any future occurrence should trigger investigation, not be treated as routine.
+2. **Verify the Active Response scope for rule 651.** Confirm the firewall-drop action only blocks the offending source IP, has a defined timeout, and doesn't risk catching legitimate hosts — and test the unblock path so the response is confirmed reversible, not just confirmed to fire.
+3. **Escalate FIM alerting on sensitive file paths.** `payroll.txt` represents financially sensitive data; its severity should sit above default Medium, with keyword-based escalation (payroll, invoice, finance) so sensitive-path changes stand out from routine FIM noise.
+4. **Add a follow-on rule for successful logins after repeated failures.** The current rule correctly detects the failure pattern, but a brute-force attempt that eventually succeeds would generate the same alert as one that's fully blocked — a gap worth closing.
+5. **Baseline legitimate account-management activity.** Alert on any account creation, enablement, or group-change event where the acting account isn't a recognized admin or automation identity.
+6. **Harden SSH authentication on the Ubuntu endpoint.** As the actual target of the observed attack, moving to key-based authentication and disabling password login removes the attack surface rule 100101 is currently compensating for.
+
+## Full report
+
+📄 [Download the full incident report (PDF)](/files/wazuh-siem-report.pdf)
